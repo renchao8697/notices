@@ -74,6 +74,7 @@ class Queue {
 ```
 
 #### Priority Queue(优先队列)
+
 Queue还有一个升级版本，给每个元素赋予优先级，优先级高的元素入列时排到低优先级之前。区别主要是enqueue方法的实现：
 ```js
 class PriorityQueue extends Queue {
@@ -99,4 +100,144 @@ pQ.enqueue(['spartacus', 1]);
 pQ.enqueue(['spartacus111', 1]);
 pQ.enqueue(['crixus', 2]);
 pQ.enqueue(['oenomaus', 4]);
+```
+
+### Linked List(链表)
+
+![linked_list](./images/linked_list.png)
+链表是一种链式数据结构，链上上的每个节点包含两种信息：节点本身的数据和指向下一个节点的指针。链表和传统的数组都是线性的数据结构，存储的都是一个序列的数据，但也有很多区别，如下表
+
+| 比较维度 | 数组 | 链表 |
+|:------:|:------:|:------:|
+| 内存分配 | 静态内存分配，编译时分配且连续 | 动态内存分配，运行时分配且不连续 |
+| 元素获取 | 通过inde获取，速度较快 | 通过遍历顺序访问，速度较慢 |
+| 添加删除元素 | 内存位置连续切固定，速度较慢 | 内存分配灵活，只有一个开销步骤，速度更快 |
+| 空间结构 | 可以是一维或者多维数组 | 可以是单向、双向或循环链表 |
+
+一个单向链表通常具有以下方法：
+* size：链表中节点的个数
+* head：链表中的头部元素
+* add：项链表尾部增加一个节点
+* remove：删除某个节点
+* indexOf：返回某个节点的index
+* elementAt：返回某个index处的节点
+* addAt：在某个index处插入一个节点
+* removeAt：删除某个index处的节点
+
+```js
+class Node {
+  constructor(element) {
+    this.node = element;
+    this.next = null;
+  }
+}
+class LinkedList {
+  constructor() {
+    this.size = 0;
+    this.head = null;
+  }
+  add(element) {
+    let node = new Node(element);
+    if (this.head === null) {
+      this.head = node;
+    } else {
+      let curNode = this.head;
+      while (curNode.next) {
+        curNode = curNode.next;
+      }
+      curNode.next = node;
+    }
+
+    this.size++;
+  }
+  addAt(index, element) {
+    if (index < 0 || index  > this.size) {
+      return null;
+    } else if (index === this.size) {
+      this.add(element);
+    } else {
+      let node = new Node(element)
+      let curNode = this.head;
+      if (index === 0) {
+        [this.head, this.head.next] = [node, curNode]
+      } else {
+        let i = 1;
+        let prevNode = curNode;
+        curNode = curNode.next;
+        while(i < index) {
+          [prevNode, curNode] = [curNode, curNode.next]
+          i++;
+        }
+        prevNode.next = node;
+        node.next = curNode
+      }
+      this.size++;
+    }
+  }
+  remove(element) {
+    let prevNode = null;
+    let curNode = this.head;
+    if (curNode.node === element) {
+      this.head = curNode.next;
+      this.size--;
+    } else {
+      while(curNode && curNode.node !== element) {
+        [prevNode, curNode] = [curNode, curNode.next]
+      }
+      if (curNode) {
+        prevNode.next = curNode.next;
+        this.size--;
+      }
+    }
+  }
+  removeAt(index) {
+    if (index < 0 || index > this.size) {
+      return null;
+    }
+    let curNode = this.head;
+    if (index === 0) {
+      this.head = curNode.next
+    } else {
+      let i = 1;
+      let prevNode = curNode;
+      curNode = curNode.next;
+      while(i < index) {
+        i++;
+        [prevNode, curNode] = [curNode, curNode.next]
+      }
+      prevNode.next = curNode.next
+    }
+    this.size--;
+    return curNode.node
+  }
+  indexOf(element) {
+    let [curNode, i] = [this.head, 0];
+    while(curNode && curNode.node !== element) {
+      curNode = curNode.next;
+      i++;
+    }
+    return curNode ? i : -1;
+  }
+  elementAt(index) {
+    if (index < 0 || index >= this.size) {
+      return null;
+    }
+    let curNode = this.head;
+    let i = 0;
+    while(i < index) {
+      curNode = curNode.next;
+      i++;
+    }
+    return curNode.node;
+  }
+  print() {
+    let curNode = this.head;
+    let linkedList = [curNode.node];
+    while (curNode.next) {
+      linkedList.push(curNode.next.node);
+      curNode = curNode.next;
+    }
+    console.log(linkedList.join('==>'));
+  }
+}
 ```
