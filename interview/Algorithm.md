@@ -245,3 +245,45 @@ const simplifyPath = (path) => {
 利用栈的思想，遍历`path`，当遇到合法的路径名（本题中只有字母、数字、两个以上的'.'和'_'）时入栈，当遇到`'.'`和多个`'/'`时跳过，遇到`'..'`时栈顶元素出站，遍历完成，将栈中元素转换为结果。
 * 时间复杂度：O(n)
 * 空间复杂度：O(n)
+* 
+#### 移除链表元素
+*LeetCode203 easy*
+*Tags: linked-list*
+
+给你一个链表的头节点`head`和一个整数`val`，请你删除链表中所有满足`Node.val == val`的节点，并返回**新的头节点**。
+
+```
+示例 1：
+输入：head = [1,2,6,3,4,5,6], val = 6
+输出：[1,2,3,4,5]
+
+示例 2：
+输入：head = [], val = 1
+输出：[]
+
+示例 3：
+输入：head = [7,7,7,7], val = 7
+输出：[]
+```
+
+答案：迭代
+**思路**
+想要删除链表节点，只要将当前节点的`next`指向想要删除的节点的下一个节点就可以了，需要特殊处理的只有`head`，删除`head`节点只要将当前head节点重新赋值给`head`的`next`，这里可以手动**引入一个哨兵节点**，让它的`next`指向`head`，这样就可以想处理其他节点一样处理`head`了，最后返回哨兵节点的`next`。
+```js
+const removeElements = (head, val) => {
+  const ele = {
+      next: head
+  }
+  let curNode = ele;
+  while(curNode.next) {
+      if (curNode.next.val === val) {
+          curNode.next = curNode.next.next;
+      } else {
+          curNode = curNode.next;
+      }
+  }
+  return ele.next;
+};
+```
+* 时间复杂度：O(n)
+* 空间复杂度：O(1)
