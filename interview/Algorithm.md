@@ -245,7 +245,7 @@ const simplifyPath = (path) => {
 利用栈的思想，遍历`path`，当遇到合法的路径名（本题中只有字母、数字、两个以上的'.'和'_'）时入栈，当遇到`'.'`和多个`'/'`时跳过，遇到`'..'`时栈顶元素出站，遍历完成，将栈中元素转换为结果。
 * 时间复杂度：O(n)
 * 空间复杂度：O(n)
-* 
+  
 #### 移除链表元素
 *LeetCode203 easy*
 *Tags: linked-list*
@@ -283,6 +283,47 @@ const removeElements = (head, val) => {
       }
   }
   return ele.next;
+};
+```
+* 时间复杂度：O(n)
+* 空间复杂度：O(1)
+
+#### 反转链表
+*LeetCode206 easy*
+*Tags: linked-list*
+
+给你单链表的头节点`head`，请你反转链表，并返回反转后的链表。
+
+```
+示例 1：
+输入：head = [1,2,3,4,5]
+输出：[5,4,3,2,1]
+
+示例 2：
+输入：head = [1,2]
+输出：[2,1]
+
+示例 3：
+输入：head = []
+输出：[]
+```
+
+答案：迭代
+**思路**
+反转链表就是要在遍历链表时将当前节点的`next`指向当前节点的前一个节点（prev），所以我们要添加一个变量`prev`来储存前一个节点，在遍历时我们只要重新给当前节点的`cur.next`和`prev`赋值就可以了，`cur.next -> prev`，`prev -> cur`，遍历时每次会将`cur -> cur.next`，处理好三者的关系，最后返回跳出循环时的`prev`。
+```js
+const reverseList = (head) => {
+  let cur = head;
+  let prev = null;
+  while (cur) {
+    // let next = cur.next;
+    // cur.next = prev;
+    // prev = cur;
+    // cur = next;
+    // 解构赋值
+    [cur.next, prev, cur] = [prev, cur, cur.next];
+  }
+  return prev;
 };
 ```
 * 时间复杂度：O(n)
