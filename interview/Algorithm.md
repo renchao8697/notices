@@ -328,3 +328,14 @@ const reverseList = (head) => {
 ```
 * 时间复杂度：O(n)
 * 空间复杂度：O(1)
+
+评论区发现一个奇特的方法：
+```js
+const reverseList = (head) => {
+    let ans = null;
+    for (let x = head; x != null; x = x.next) {
+        ans = new ListNode(x.val,ans);
+    }
+    return ans;
+};
+```
