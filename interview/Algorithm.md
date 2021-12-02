@@ -407,3 +407,76 @@ const hasCycle = (head) => {
 ```
 * 时间复杂度：O(n)
 * 空间复杂度：O(1)
+
+#### 环形链表2
+*LeetCode142 medium*
+*Tags: linked-list | two-pointers*
+
+给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回`null`。
+
+如果链表中有某个节点，可以通过连续跟踪`next`指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数`pos`来表示链表尾连接到链表中的位置（索引从 0 开始）。如果`pos`是`-1`，则在该链表中没有环。**注意：`pos`不作为参数进行传递**，仅仅是为了标识链表的实际情况。
+
+**不允许修改**链表。
+```
+示例 1：
+输入：head = [3,2,0,-4], pos = 1
+输出：返回索引为 1 的链表节点
+解释：链表中有一个环，其尾部连接到第二个节点。
+
+示例 2：
+输入：head = [1,2], pos = 0
+输出：返回索引为 0 的链表节点
+解释：链表中有一个环，其尾部连接到第一个节点。
+
+示例 3：
+输入：head = [1], pos = -1
+输出：返回 null
+解释：链表中没有环。
+```
+
+答案1：哈希表
+**思路同141题**
+```js
+const detectCycle = (head) => {
+    const cache = new Set();
+    while(head) {
+      if (cache.has(head)) {
+        return head;
+      } else {
+        cache.add(head);
+        head = head.next;
+      }
+    }
+    return null;
+};
+```
+* 时间复杂度：O(n)
+* 空间复杂度：O(n)
+
+答案2：快慢指针
+**思路**
+![algorithm142](./images/algorithm142.png);
+上接141题思路，如果所示，快指针走的路程是慢指针的`2`倍，设两个指针在N点相遇，`a+b`为慢指针的路程，`a+b+c+b`为快指针的路程，`2(a+b)=a+b+c+b --> a=c`，所以我们只要在快慢指针相遇时，再次遍历，`start`从链表头开始，`slow`从`N`开始，当二者相遇时，即该节点就是环的起始节点。
+```js
+const detectCycle = (head) => {
+    let slow  = head;
+    let fast = head;
+    let start = head;
+    while(fast && fast.next) {
+      slow = slow.next;
+      fast = fast.next.next;
+      if (slow === fast) {
+        while(slow && start) {
+          if (slow === start) {
+            return slow;
+          }
+          slow = slow.next;
+          start = start.next;
+        }
+      }
+    }
+    return null;
+};
+```
+* 时间复杂度：O(n)
+* 空间复杂度：O(1)
