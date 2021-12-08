@@ -480,3 +480,82 @@ const detectCycle = (head) => {
 ```
 * 时间复杂度：O(n)
 * 空间复杂度：O(1)
+
+#### 相同的树
+*LeetCode100 easy*
+*Tags: tree | depth-first-search*
+
+给你两棵二叉树的根节点`p`和`q`，编写一个函数来检验这两棵树是否相同。
+如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。
+
+```
+示例 1：
+输入：p = [1,2,3], q = [1,2,3]
+输出：true
+
+示例 2：
+输入：p = [1,2], q = [1,null,2]
+输出：false
+
+示例 3：
+输入：p = [1,2,1], q = [1,1,2]
+输出：false
+```
+
+答案：
+**思路**
+递归遍历两树进行比较，找出所有边界，进行遍历即可。
+* `p`和`q`都为`null`，返回`true`
+* `p`和`q`其中一个为`null`，另一个不为`null`，返回`false`
+* `p`和`q`的`val`不相等，返回`false`
+* 如果都不满足，则递归执行
+```js
+const isSameTree = (p, q) => {
+  if (p === null && q === null) {
+    return true;
+  }
+  if (p === null || q === null) {
+    return false;
+  }
+  if (p.val !== q.val) {
+    return false;
+  }
+  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+};
+```
+
+#### 翻转二叉树
+*LeetCode226 easy*
+*Tags: tree*
+
+翻转一棵二叉树。
+
+```
+示例：
+输入：
+     4
+   /   \
+  2     7
+ / \   / \
+1   3 6   9
+
+输出：
+     4
+   /   \
+  7     2
+ / \   / \
+9   6 3   1
+```
+
+答案：
+**思路**
+从根节点开始，递归的对树进行遍历，将叶子节点的子节点左右翻转即可完成树的翻转。
+```js
+const invertTree = (root) => {
+  if (root === null) {
+    return root;
+  }
+  [root.left, root.right] = [invertTree(root.right), invertTree(root.left)];
+  return root;
+};
+````
