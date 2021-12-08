@@ -241,3 +241,29 @@ class LinkedList {
   }
 }
 ```
+
+### Set(集合)
+
+![set](./images/set.png)
+集合是数学中的一个基本概念，表示具有某种特性的对象汇总成的集体。在ES6中也引入了集合类型`Set`,`Set`和`Array`有一定程度的相似，不同的是`Set`中不允许出现重复的元素而且是无序的。
+一个典型的`Set`应该具有以下方法：
+* values：返回集合中的所有元素
+* size：返回集合中元素的个数
+* has：判断集合中是否存在某个元素
+* add：向集合中添加元素
+* remove：从集合中移除某个元素
+* union：返回两个集合的并集
+* intersection：返回两个集合的交集
+* difference：返回两个集合的差集
+* subset：判断一个集合是否为另一个集合的子集
+
+### Hash Table(哈希表/散列表)
+
+![hash_table](./images/hash_table.png)
+
+Hash Table是一种用于存储键值对（key value pair）的数据结构，因为Hash Table根据key查询value的速度很快，所以它常用于实现Map、Dictionary、Object等数据结构。如上图所示，Hash Table内部使用一个hash函数将传入的键转换成一串数字，而这串数字将作为键值对实际的key，通过这个key查询对应的value非常快，时间复杂度将达到O(1)。Hash函数要求相同输入对应的输出必须相等，而不同输入对应的输出必须不等，相当于对每对数据打上唯一的指纹。
+
+一个Hash Table通常具有下列方法：
+* add：增加一组键值对
+* remove：删除一组键值对
+* lookup：查找你哥键对应的值
