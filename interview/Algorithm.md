@@ -559,3 +559,182 @@ const invertTree = (root) => {
   return root;
 };
 ````
+
+#### 二叉树的前序遍历
+*LeetCode144 easy*
+*Tags: stack | tree*
+
+给你二叉树的根节点`root`，返回它节点值的**前序**遍历。
+
+```
+示例 1：
+输入：root = [1,null,2,3]
+输出：[1,2,3]
+
+示例 2：
+输入：root = []
+输出：[]
+
+示例 3：
+输入：root = [1]
+输出：[1]
+
+示例 4：
+输入：root = [1,2]
+输出：[1,2]
+
+示例 5：
+输入：root = [1,null,2]
+输出：[1,2]
+```
+
+答案1：递归
+
+```js
+const preorderTraversal = (root, arr = []) => {
+  if (root) {
+    arr.push(root.val);
+    preorderTraversal(root.left, arr);
+    preorderTraversal(root.right, arr);
+  }
+  return arr;
+};
+```
+
+答案2：迭代
+
+```js
+const preorderTraversal = (root) => {
+  let cur = root;
+  let stack = [];
+  let result = [];
+  while(cur || stack.length) {
+    while(cur) {
+      result.push(cur.val);
+      stack.push(cur);
+      cur = cur.left;
+    }
+    cur = stack.pop();
+    cur = cur.right;
+  }
+  return result;
+}
+```
+
+#### 二叉树的中序遍历
+*LeetCode94 easy*
+*Tags: hash-table | stack | tree*
+
+给你二叉树的根节点`root`，返回它节点值的**中序**遍历。
+
+```
+示例 1：
+输入：root = [1,null,2,3]
+输出：[1,3,2]
+
+示例 2：
+输入：root = []
+输出：[]
+
+示例 3：
+输入：root = [1]
+输出：[1]
+
+示例 4：
+输入：root = [1,2]
+输出：[2,1]
+
+示例 5：
+输入：root = [1,null,2]
+输出：[1,2]
+```
+
+答案1：递归
+
+```js
+const inorderTraversal = (root, arr = []) => {
+  if (root) {
+    inorderTraversal(root.left, arr);
+    arr.push(root.val);
+    inorderTraversal(root.right, arr);
+  }
+  return arr;
+};
+```
+
+答案2：迭代
+
+```js
+const inorderTraversal = (root) => {
+  let cur = root;
+  let stack = [];
+  let result = [];
+  while(cur || stack.length) {
+    while(cur) {
+      stack.push(cur);
+      cur = cur.left;
+    }
+    cur = stack.pop();
+    result.push(cur.val);
+    cur = cur.right;
+  }
+  return result;
+}
+```
+
+#### 二叉树的后序遍历
+*LeetCode145 easy*
+*Tags: stack | tree*
+
+给你二叉树的根节点`root`，返回它节点值的**后序**遍历。
+
+```
+示例:
+输入: [1,null,2,3]  
+   1
+    \
+     2
+    /
+   3 
+
+输出: [3,2,1]
+```
+
+答案1：递归
+
+```js
+const postorderTraversal = (root, arr = []) => {
+  if (root) {
+    postorderTraversal(root.left, arr);
+    postorderTraversal(root.right, arr);
+    arr.push(root.val);
+  }
+  return arr;
+};
+```
+
+答案2：迭代
+
+```js
+const postorderTraversal = (root) => {
+  let cur = root;
+  let stack = [];
+  let result = [];
+  let prev = [];
+  while(cur || stack.length) {
+    while(cur) {
+      stack.push(cur);
+      cur = cur.left;
+    }
+    cur = stack.pop();
+    if (!cur.right || cur.right === prev) {
+      result.push(cur.val);
+      [prev, cur] = [cur, null];
+    } else {
+      stack.push(cur);
+      cur = cur.right;
+    }
+  }
+  return result;
+}
+```
