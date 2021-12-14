@@ -745,7 +745,7 @@ const postorderTraversal = (root) => {
 
 给你一个二叉树的根节点`root`，判断其是否是一个有效的二叉搜索树。
 
-有效 二叉搜索树定义如下：
+**有效**二叉搜索树定义如下：
 * 节点的左子树只包含**小于**当前节点的数。
 * 节点的右子树只包含**大于**当前节点的数。
 * 所有左子树和右子树自身必须也是二叉搜索树。
@@ -761,8 +761,9 @@ const postorderTraversal = (root) => {
 解释：根节点的值是 5 ，但是右子节点的值是 4 。
 ```
 
-答案：
-
+答案1：中序遍历
+**思路**
+中序遍历一个二叉搜索树，得到的是一个递增的数组，所以我们只要中序遍历时，验证当前节点的值是否大于前一个节点的值即可。
 ```js
  const isValidBST = (root) => {
     let cur = root;
@@ -782,3 +783,25 @@ const postorderTraversal = (root) => {
     }
     return true;
 };
+```
+* 时间复杂度：O(n)
+* 空间复杂度：O(n)
+
+答案2：递归
+**思路**
+利用一个递归函数`help(root, lower, upper)`来递归判断，递归函数判断当前值是否在`(lower，upper)`区间内，如果不在，直接返回`false`，如果在则递归判断它的左右节点。递归调用，直到超出边界或节点为`null`。
+```js
+const helper = (root, lower, upper) => {
+    if (root === null) {
+        return true;
+    }
+    if (root.val <= lower || root.val >= upper) {
+        return false;
+    }
+    return helper(root.left, lower, root.val) && helper(root.right, root.val, upper);
+}
+
+const isValidBST = (root) => {
+    return helper(root, -Infinity, Infinity);
+}
+```
