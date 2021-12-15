@@ -808,28 +808,117 @@ const isValidBST = (root) => {
 
 #### 二叉树的最大深度
 *LeetCode104 easy*
-*Tags: tree*
+*Tags: tree | depth-first-search*
 
 给定一个二叉树，找出其最大深度。
 
 二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。
 
-说明:叶子节点是指没有子节点的节点。
+**说明**: 叶子节点是指没有子节点的节点。
 
 ```
 示例：
-给定二叉树[3,9,20,null,null,15,7]，
+给定二叉树 [3,9,20,null,null,15,7]，
     3
    / \
   9  20
     /  \
    15   7
-返回它的最大深度3。
+返回它的最大深度 3 。
 ```
-答案：
+答案1：递归
+**思路**
+我们只要知道左子树和右子树的最大深度`l`和`r`，就可以得出二叉树的最大深度为`max(l, r) + 1`，而左右子树的最大深度又可以以同样的方式计算，所以我们可以使用递归计算出该题的答案。
 ```js
 const maxDepth = (root) => {
     if (root === null) return 0;
     return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+};
+```
+
+答案2：广度优先搜索
+**思路**
+我们可以使用广度优先进行遍历，每遍历一层，深度`+1`，遍历完成后，即可得到最大深度。
+具体实现，我们可以使用队列存储节点，双层循环，外层循环负责每次的遍历，内层循环负责改层每个节点的遍历，外层每循环一次，深度`+1`，直到队列为空，得到的深度就是最大深度。
+```js
+const maxDepth = (root) => {
+  if (!root) return 0;
+  let queue = [root];
+  let res = 0;
+  while(queue.length) {
+    let size = queue.length;
+    // size为该层的节点数，遍历该层的节点，
+    // 每遍历一个节点，就在队列中删除该节点，
+    // 每当size值为0时，说明该层已经遍历完毕，
+    // 跳出循环，深度+1
+    while(size > 0) {
+      let node = queue.shift();
+      if (node.left) {
+        queue.push(node.left);
+      }
+      if (node.right) {
+        queue.push(node.right);
+      }
+      size--;
+    }
+    res++;
+  }
+  return res;
+}
+```
+
+#### 二叉搜索树的最近公共祖先
+*LeetCode235 easy*
+*Tags: tree*
+
+给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。
+
+百度百科中最近公共祖先的定义为：“对于有根树`T`的两个结点`p`、`q`，最近公共祖先表示为一个结点`x`，满足`x`是`p`、`q`的祖先且`x`的深度尽可能大（一个节点也可以是它自己的祖先）。”
+
+例如，给定如下二叉搜索树:  root = `[6,2,8,0,4,7,9,null,null,3,5]`。
+
+```
+示例 1:
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
+输出: 6 
+解释: 节点 2 和节点 8 的最近公共祖先是 6。
+
+示例 2:
+输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4
+输出: 2
+解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。
+```
+
+说明：
+* 所有节点的值都是唯一的。
+* `p`、`q`为不同节点且均存在于给定的二叉搜索树中。
+
+答案1：递归
+
+```js
+const lowestCommonAncestor = (root, p, q) => {
+    if (root.val > p.val && root.val > q.val) {
+      return lowestCommonAncestor(root.left, p, q);
+    } else if (root.val < p.val && root.val < q.val) {
+      return lowestCommonAncestor(root.right, p, q);
+    } else {
+      return root;
+    }
+};
+```
+
+答案：
+
+```js
+const lowestCommonAncestor = (root, p, q) => {
+  while(root) {
+    if (root.val > p.val && root.val > q.val) {
+      root = root.left;
+    } else if (root.val < p.val && root.val < q.val) {
+      root = root.right;
+    } else {
+      return root;
+    }
+  }
 };
 ```
