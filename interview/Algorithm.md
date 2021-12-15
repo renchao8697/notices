@@ -946,3 +946,18 @@ const lowestCommonAncestor = (root, p, q) => {
 输入：root = [1,2], p = 1, q = 2
 输出：1
 ```
+
+答案：
+
+```js
+const lowestCommonAncestor = (root, p, q) => {
+    if (root === null || root === p || root === q) {
+        return root;
+    }
+    const left = lowestCommonAncestor(root.left, p, q);
+    const right = lowestCommonAncestor(root.right, p, q);
+    if (left === null) return right;
+    if (right === null) return left;
+    return root;
+};
+```
