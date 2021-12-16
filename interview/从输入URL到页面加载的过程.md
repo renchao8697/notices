@@ -384,3 +384,93 @@ HTML页面也有一个meta标签可以控制缓存方案`Pragma`
 <meta HTTP-EQUIV="Pragma" CONTENT="no-chche">
 ```
 不过，这种方案还是比较少用到，因为支持情况不佳，譬如缓存代理服务器肯定不支持，所以不推荐
+
+##### 头部的区别
+首先明确，http的发展是从http1.0到http1.1，而在http1.1中，出了一些新内容，弥补了http1.0的不足
+
+**http1.0中的缓存控制：**
+* `Pragma`：严格来说，它不属于专门的缓存控制头部，但是它设置`no-cache`时可以让本地强缓存失效（属于编译控制，来实现特定的指令，主要是因为兼容http1.0，所以以前被大量应用）
+* `Expires`：服务端配置的，属于强缓存，用来控制在规定的时间之前，浏览器不会发出请求，而是直接使用本地缓存，注意，Expires一般对应服务端时间，如`Expires: Fir, 30 Oct 1998 14:19:41`
+* `If-Modified-Since/Last-Modified`：值两个是成对出现的，属于协商缓存的内容，其中浏览器的头部是`If-Modified-Since`，而服务端的是`Last-Modified`，它的作用是，在发起请求时，如果`If-Modified-Since`和`Last-Modified`匹配，那么代表服务器资源并未改变，因此服务端不会反悔资源实体，而是只反悔头部，通知浏览器可以使用本地缓存。`Last-Modified`，顾明司仪，指的是文件最后的修改时间，而且只能精确到`1s`以内
+
+**http1.1中的缓存控制：**
+* `Cache-Control`：缓存控制头部，有`no-cache`、`max-age`等多种取值
+* `Max-Age`：服务端配置，用来控制强缓存，在规定的时间之内，浏览器无需发出请求，直接使用本地缓存，注意，`Max-age`是`Cache-Control`头部的值，不是独立的头部，譬如`Cache-Control: max-age=3600`，而且它的值得是绝对时间，由浏览器自己计算
+* `If-None-Match/E-tag`：这两个是成对出现的，属于协商缓存的内容，其中浏览器的头部是`If-None-Match`，而服务端的是`E-tag`，同样,发出请求后，如果`If-None-Match`和`E-tag`匹配，则代表内容未变，通知浏览器使用本地缓存，和`Last-Modified`不同，`E-tag`更精确，它是类似于指纹一样的东西，基于`FileEtag INode Mtime Size`生成，也就是说，只要文件变，指纹就会变，而且没有1s精确度的限制。
+
+**Max-Age相比Expires？**
+`Expires`使用的是服务器端的时间
+但是有时候会有这样一种情况-客户端时间和服务端不同步
+那这样，可能就会出现问题了，造成了浏览器本地的缓存无用或者一直无法过期
+所以一般`http1.1`后不推荐使用`Expires`
+而`Max-Age`使用的是客户端本地时间的计算，因此不会有这个问题
+所以推荐使用`Max-Age`。
+注意，如果同时启用`Cache-Control`与`Expires`，`Cache-Control`优先级高。
+
+**E-tag相比Last-Modified？**
+Last-Modified：
+* 表明服务端的文件最后何时改变的
+* 它有一个缺陷就是只能精确到1s
+* 然后还有一个问题就是有的服务端的文件会周期性的改变，导致缓存失效
+
+而E-tag：
+* 是一种指纹机制，代表文件相关指纹
+* 只有文件变才会变，也只要文件变就会变，
+* 也没有精确时间的限制，只要文件一变，立马E-tag就不一样了
+
+如果同时带有E-tag和Last-Modified，服务端会优先检查E-tag
+各大缓存头部的整体关系如下图
+
+![http_cache](./images/http_cache.png)
+
+## 解析页面流程
+
+前面有提到http交互，那么接下来就是浏览器获取到html，然后解析，渲染
+
+### 流程简述
+
+浏览器内核拿到内容后，渲染步骤大致可以分为以下几步：
+> 1. 解析html，构建DOm树
+> 2. 解析css，生成css规则树
+> 3. 合并DOM树和css规则，生成render树
+> 4. 布局render树（Layout/reflow），负责各元素尺寸、位置的计算
+> 5. 绘制render树（paint），绘制页面像素信息
+> 6. 浏览器会将各层的信息发送给GPU，GPU会将各层合成（composite），显示在屏幕上
+
+如下图：
+![browser_render](./images/browser_render.png)
+
+### HTML解析，构建DOm
+
+整个渲染步骤中，HTML解析是第一步。
+简单的解释，这一步的流程是这样的：**浏览器解析HTML，构建DOM树。**
+但实际上，在分析整体构建时，却不能一笔带过，得稍微展开。
+解析HTML到构建出DOM当然过程可以简述如下：
+> Bytes -> characters -> tokens -> nodes -> DOM
+
+譬如建设有这样一个HTML页面：
+```html
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="style.css" rel="stylesheet">
+    <title>Critical Path</title>
+  </head>
+  <body>
+    <p>Hello <span>web performance</span> students!</p>
+    <div><img src="awesome-photo.jpg"></div>
+  </body>
+</html>
+```
+浏览器的处理如下：
+![dom1](./images/dom1.jpg)
+
+列举其中的一些重点过程：
+> 1. Conversion转换：浏览器将获得的HTML内容（Bytes）基于他的编码转换为单个字符
+> 2. Tokenizing分词：浏览器按照HTML规范标准将这些字符转换为不同标记的token。每个token都有自己独特的含义一级规则集
+> 3. Lexing词法分析：分词的结果是得到一堆的token，此时把他们转换为对象，这些对象分别定义他们的属性和规则
+> 4. DOM构建：因为HTML标记定义的就是不同标签之间的关系，这个关系就像是一个树形结构一样
+> 例如：body对象的父节点就是HTML对象，然后段落p对象的父节点就是body对象
+
+最后DOM树如下：
+![dom_tree](./images/dom_tree.png)
