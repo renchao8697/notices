@@ -963,7 +963,7 @@ const lowestCommonAncestor = (root, p, q) => {
 ```
 
 #### 猜数字大小
-*LeetCode2374 easy*
+*LeetCode374 easy*
 *Tags: binary-search*
 
 猜数字游戏的规则如下：
@@ -1013,4 +1013,68 @@ const guessNumber = (n) => {
   }
   return min;
 };
+```
+
+#### Pow(x, n)
+*LeetCode50 medium*
+*Tags: binary-search*
+
+实现`pow(x, n)`，即计算`x`的`n`次幂函数（即，$x^{n}$）。
+
+```
+示例 1：
+输入：x = 2.00000, n = 10
+输出：1024.00000
+
+示例 2：
+输入：x = 2.10000, n = 3
+输出：9.26100
+
+示例 3：
+输入：x = 2.00000, n = -2
+输出：0.25000
+解释：2-2 = 1/22 = 1/4 = 0.25
+```
+
+答案1：
+
+```js
+const myPow = (x, n) => {
+  if (x === 1 || n === 0) {
+    return 1;
+  }
+  if (n < 0) {
+    x = 1 / x;
+    n = -n;
+  }
+  return helps(x, n);
+};
+
+const helps = (x, n) => {
+  if (n === 0) {
+    return 1;
+  }
+  let val = helps(x, parseInt(n /2))
+  return n % 2 ? val * val * x : val * val;
+}
+```
+
+答案2：
+```js
+const myPow = (x, n) => {
+  return n >= 0 ? helps(x, n) : helps(1/x, -n);
+}
+
+const helps = (x, n) => {
+  let res = 1;
+  let y = x;
+  while (n > 0) {
+    if (n % 2 === 1) {
+      res *= y;
+    }
+    y *= y;
+    n = parseInt(n / 2);
+  }
+  return res;
+}
 ```
