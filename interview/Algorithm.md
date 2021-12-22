@@ -1173,3 +1173,66 @@ const permute = (nums)=> {
     return list;
 };
 ```
+
+#### 单词搜索
+*LeetCode79 medium*
+*Tags: array | backtracking*
+
+给定一个`m x n`二维字符网格`board`和一个字符串单词`word`。如果`word`存在于网格中，返回`true`；否则，返回`false`。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+
+```
+示例 1：
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCCED"
+输出：true
+
+示例 2：
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "SEE"
+输出：true
+
+示例 3：
+输入：board = [["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], word = "ABCB"
+输出：false
+```
+
+答案：
+```js
+const check = (board, word, i, j, visited, newword) => {
+  let k = newword.length;
+  if (newword + board[i][j] === word) {
+    return true;
+  }
+  visited[i][j] = '1';
+  if (board[i][j] === word[k]) {
+    newword += word[k];
+    let arr = [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]]
+    for (let k = 0; k < arr.length; k++) {
+      let x = arr[k][0];
+      let y = arr[k][1];
+      if ((x >= 0 && x < board.length) && (y >= 0 && y < board[i].length) && (visited[x][y] !== '1')) {
+        let flag = check(board, word, x, y, visited, newword);
+        if (flag) {
+          return true;
+        }
+        visited[x][y] = '0'
+      }
+    }
+  } 
+}
+    
+const exist = (board, word) => {
+  let bSet = new Set([...board.flat()]);
+  let wSet = new Set(word);
+  if(bSet.size < wSet.size) return false;
+  for (let i = 0; i < board.length; i++) {
+    for (let j = 0; j < board[i].length; j++) {
+      let visited = JSON.parse(JSON.stringify(board));
+      let flag = check(board, word, i, j, visited, '');
+      if (flag) return true;
+    }
+  }
+  return false;
+};
+```
