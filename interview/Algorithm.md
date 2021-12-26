@@ -1286,3 +1286,133 @@ var solveNQueens = function(n) {
     }
 };
 ```
+
+#### 排序数组
+*LeetCode912 medium*
+*Tags: binary-search | random*
+
+给你一个整数数组`nums`，请你将该数组升序排列。
+
+```
+示例 1：
+输入：nums = [5,2,3,1]
+输出：[1,2,3,5]
+
+示例 2：
+输入：nums = [5,1,1,2,0,0]
+输出：[0,0,1,1,2,5]
+```
+
+答案：
+```js
+const sortArray = (nums) => {
+    for (let i = 0; i < nums.length; i++) {
+        for (let j = i + 1; j < nums.length; j++) {
+            if (nums[i] > nums[j]) {
+                [nums[i], nums[j]] = [nums[j], nums[i]];
+            }
+        }
+    }
+    return nums;
+};
+```
+
+#### 删除有序数组中的重复项
+*LeetCode26 easy*
+*Tags: array | two-pointers*
+
+给你一个有序数组`nums`，请你**原地**删除重复出现的元素，使每个元素**只出现一次**，返回删除后数组的新长度。
+
+不要使用额外的数组空间，你必须在**原地**修改输入数组 并在使用`O(1)`额外空间的条件下完成。
+
+说明:
+
+为什么返回数值是整数，但输出的答案是数组呢?
+
+请注意，输入数组是以「引用」方式传递的，这意味着在函数里修改输入数组对于调用者是可见的。
+
+你可以想象内部操作如下:
+```js
+// nums 是以“引用”方式传递的。也就是说，不对实参做任何拷贝
+int len = removeDuplicates(nums);
+
+// 在函数里修改输入数组对于调用者是可见的。
+// 根据你的函数返回的长度, 它会打印出数组中 该长度范围内 的所有元素。
+for (int i = 0; i < len; i++) {
+    print(nums[i]);
+}
+```
+
+```
+示例 1：
+输入：nums = [1,1,2]
+输出：2, nums = [1,2]
+解释：函数应该返回新的长度 2 ，并且原数组 nums 的前两个元素被修改为 1, 2 。不需要考虑数组中超出新长度后面的元素。
+
+示例 2：
+输入：nums = [0,0,1,1,1,2,2,3,3,4]
+输出：5, nums = [0,1,2,3,4]
+解释：函数应该返回新的长度 5 ， 并且原数组 nums 的前五个元素被修改为 0, 1, 2, 3, 4 。不需要考虑数组中超出新长度后面的元素。
+```
+
+答案：
+```js
+const removeDuplicates = (nums) => {
+    let len = nums.length;
+    let slow = 0;
+    for (let fast = 0; fast < len; fast++) {
+        if (nums[fast] !== nums[slow]) {
+            slow++;
+            nums[slow] = nums[fast];
+        }
+    }
+    return slow + 1;
+};
+```
+
+#### 盛最多水的容器
+*LeetCode11 medium*
+*Tags: array | two-pointers*
+
+给你`n`个非负整数`a1，a2，...，an，`每个数代表坐标中的一个点`(i, ai)`。在坐标内画`n`条垂直线，垂直线`i`的两个端点分别为`(i, ai)`和`(i, 0)`。找出其中的两条线，使得它们与`x`轴共同构成的容器可以容纳最多的水。
+
+说明：你不能倾斜容器。
+
+```
+示例 1：
+输入：[1,8,6,2,5,4,8,3,7]
+输出：49 
+解释：图中垂直线代表输入数组 [1,8,6,2,5,4,8,3,7]。在此情况下，容器能够容纳水（表示为蓝色部分）的最大值为 49。
+
+示例 2：
+输入：height = [1,1]
+输出：1
+
+示例 3：
+输入：height = [4,3,2,1,4]
+输出：16
+
+示例 4：
+输入：height = [1,2,1]
+输出：2
+```
+
+答案：
+```js
+const maxArea = (height) => {
+    let l = 0, r = height.length - 1;
+    let ans = 0;
+    while (l < r) {
+        let area = Math.min(height[l], height[r]) * (r - l);
+        ans = Math.max(ans, area);
+        if (height[l] <= height[r]) {
+            ++l;
+        }
+        else {
+            --r;
+        }
+    }
+    return ans;
+
+}
+```
