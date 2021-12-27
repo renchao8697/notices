@@ -1416,3 +1416,58 @@ const maxArea = (height) => {
 
 }
 ```
+
+#### 三数之和
+*LeetCode15 medium*
+*Tags: array | two-pointers*
+
+给你一个包含`n`个整数的数组`nums`，判断`nums`中是否存在三个元素*a，b，c*，使得*a + b + c = 0*？请你找出所有和为`0`且不重复的三元组。
+
+注意：答案中不可以包含重复的三元组。
+
+```
+示例 1：
+输入：nums = [-1,0,1,2,-1,-4]
+输出：[[-1,-1,2],[-1,0,1]]
+
+示例 2：
+输入：nums = []
+输出：[]
+
+示例 3：
+输入：nums = [0]
+输出：[]
+```
+
+答案：
+```js
+const threeSum = (nums) => {
+    let len = nums.length;
+    if (len < 3) return [];
+    nums.sort((a, b) => a - b);
+    let result = [];
+
+    for (let i = 0; i < len - 2; i++) {
+        let j = i + 1, k = len - 1;
+        if (nums[i] === nums[i - 1]) continue;
+        while(j < k) {
+            if (nums[i] + nums[j] + nums[k] > 0) {
+                k--;
+            } else if (nums[i] + nums[j] + nums[k] < 0) {
+                j++;
+            } else {
+                result.push([nums[i], nums[j], nums[k]]);
+                j++;
+                while(nums[j] === nums[j - 1]) {
+                    j++;
+                }
+                k--;
+                while(nums[k] === nums[k + 1]) {
+                    k--;
+                }
+            }
+        }
+    }
+    return result;
+};
+```
