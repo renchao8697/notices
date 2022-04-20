@@ -1,0 +1,98 @@
+## webpack与gulp的区别
+
+* gulp是一个基于流（stream）自动化构建工具，可以配合各种插件对js、css、img的压缩合并，做到减少文件体积，加快请求速度和请求次数。它会自动执行指定的任务，就像 *流水线* ，通过不同的插件对资源进行加工。
+* webpack是一个用于现代JavaScript应用程序的 *静态模块打包工具* 。当webpack处理应用程序时，它会在内部从一个或多个入口递归的构建一个 **依赖图** ，然后将你项目中所需的每一个模块组合成一个或多个bundles，他们均为静态资源，用于展示你的内容。如果说gulp是一个 *流水线* 的话，webpack就像一个 *工厂* ，它们的侧重点不一样，工厂里自然会包含 *流水线* ，gulp只是webpack功能的一部分。
+  - 静态模块：静态模块指的是开发阶段，可以被webpack直接引用的资源（可以直接被获取打包进bundle.js的资源）
+  - 依赖图：当webpack处理应用程序时，它会在内部构件一个依赖图，此依赖图对应映射到项目所需的每个模块（不局限js文件），并生成一个或多个bundle
+
+* gulp实例
+```js
+const gulp = require('gulp');
+// 获取插件
+const babel = require('gulp-babel');
+// 定义任务
+gulp.task('babel', () => {
+  return gulp.src('./src/js') // 创建一个流
+    .pipe(babel({presets: ['@babel/env']})) 
+    .pipe(gulp.dest('./dist/js'))  // dest写入
+})
+
+// 定义任务列表
+const tasks = ['babel'];
+
+// 使用series按顺序执行任务
+gulp.task('default', gulp.series(...tasks, (done) => {
+  done();
+}))
+
+```
+
+## webpack相关概念
+* entry：入口起点，用来告诉webpack用哪个文件作为构建依赖图的起点。webpack会根据entry递归的去寻找依赖，每个依赖都将被它处理，最后输出到打包成果中。
+* output：output属性告诉webpack在哪里输出它所创建的bundle，以及如何命名这些文件。
+* mode：4.0开始，webpack支持零配置，旨在未开发人员减少上手难度，同时加入了mode的概念，用于指定打包的目标环境，以便在打包的过程中启用webpack针对不同的环境下内置的优化。
+* loader：默认情况下webpack只能处理JavaScript和JSON文件。loader让webpack能够去处理其他类型的文件，并将它们转换为有效模块，以供应用程序使用。
+* plugin：loader用于转换某些类型的模块，而插件则可以用于执行范围更广的任务。包括：打包优化，资源管理，注入环境变量。
+* chunk：指代码块，一个chunk可能由多个模块组合而成，也用于代码合并与分割。
+* bundle：资源经过webpack流程解析编译后最终输出的成果文件。
+* module：是开发中的单个模块，在webpack的世界里，一切皆模块，一个模块对应一个文件，webpack会从配置的entry中递归开始找出所有依赖的模块，生成依赖图。
+
+## loader和plugin的区别？
+* 作用：
+  - `loader`直译为“加载器”。webpack将一切文件视为模块，但是webpack原生值能解析js和json文件，如果想将其他文件也打包的话，就会用到`loader`。所以`loader`的作用是让webpack拥有了加载和解析其他文件的能力。
+  - `plugin`直译为“插件”。`plugin`可以扩展webpack的功能，让webpack具有更多的灵活性。在webpack运行的生命周期中会广播出许多时间，`plugin`可以监听这些时间，在合适的时机通过webpack提供的API改变输出结果。
+* 用法：
+  - loader在`module.rules`中配置，也就是说他作为模块的解析规则而存在。类型为数组，每一项都是一个`Object`，里面描述了队医什么类型的文件（`test`），使用什么加载（`loader`）和使用的参数（`options`）
+  - plugin在`plugins`中单独配置。类型为数组，每一项是一个`plugin`的实例，参数都通过构造函数传入。
+
+
+## 自定义loader
+```js
+module.exports = function(source) {
+  // 获取配置文件传递的参数
+  // this.getOptions是5.x的方法
+  // 4.x使用this.query或通过loader-utils提供方法获取
+  const options = this.getOptions();
+  return source;
+}
+```
+* loader就是一个函数，声明式函数，不能用箭头函数（因为函数中的`this`作为上下文会被webpack填充，并且`loader runner`中包含一些使用的方法）
+* `this.callback`，可使用`this.callback`方法来返回多个信息
+```js
+module.exports = function(source) {
+  this.callback(null, source);
+}
+// this.callback函数参数
+this.callback(
+  err: Error | null,
+  content: string | Buffer,
+  sourceMap?: SourceMap,
+  mata?: any
+)
+```
+* `this.async`，如果loader中有异步操作，可使用`this.async`
+```js
+module.exports = function(source) {
+  const callback = this.async();
+  setTimeout(() => {
+    // 参数与this.callback相同
+    callback(null, source);
+  }, 1000)
+}
+```
+* 多个loader会按数组自后向前执行
+* loader路径，自定义loader可以通过两种方式添加至rules
+  - 使用path获取绝对路径添加`use: [path.resolve(__dirname, "./loaders/loader1.js")]`
+  - 使用resolveLoader添加`resolveLoader: {modules: ["node_modules", "./loader"]}`
+
+* 编写loader应遵循以下准则
+  - 保持 **简单** ：loaders应该只做单一任务
+  - 使用 **链式**传递 ：利用loader链式调用的特点
+  - **模块化** 的输出 ：保证输出模块化
+  - 确保 **无状态** ：确保loader在不同模块转换之间不保存状态
+  - 使用 **loader utilities** ：充分利用`loader-utils`包，它提供了许多工具
+  - 记录 **loader的依赖** ：如果一个loader使用外部资源，必须声明它（`addDependncy`）
+  - 解析 **模块依赖关系** ：根据模块类型，可能会有不同的模式指定依赖关系；两种方式：转化成`require`语句、使用`this.resolve`解析
+  - 提取 **通用代码** ：避免在loader处理的每个模块中生成通用代码。应该在loader中创建一个运行时文件，并生成`require`语句引用该共享模块
+  - 避免 **绝对路径** ：不要在模块代码中插入绝对路径，因为当项目路径变化时，文件绝对路径也会变化
+  - 使用 **peer dependencies** ：同等依赖（peer dependencies），如果你的loader简单包裹另外一个包，你应该把这个包作为一个`peerDependency`引入
