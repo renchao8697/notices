@@ -85,14 +85,84 @@ module.exports = function(source) {
   - 使用path获取绝对路径添加`use: [path.resolve(__dirname, "./loaders/loader1.js")]`
   - 使用resolveLoader添加`resolveLoader: {modules: ["node_modules", "./loader"]}`
 
-* 编写loader应遵循以下准则
-  - 保持 **简单** ：loaders应该只做单一任务
-  - 使用 **链式**传递 ：利用loader链式调用的特点
-  - **模块化** 的输出 ：保证输出模块化
-  - 确保 **无状态** ：确保loader在不同模块转换之间不保存状态
-  - 使用 **loader utilities** ：充分利用`loader-utils`包，它提供了许多工具
-  - 记录 **loader的依赖** ：如果一个loader使用外部资源，必须声明它（`addDependncy`）
-  - 解析 **模块依赖关系** ：根据模块类型，可能会有不同的模式指定依赖关系；两种方式：转化成`require`语句、使用`this.resolve`解析
-  - 提取 **通用代码** ：避免在loader处理的每个模块中生成通用代码。应该在loader中创建一个运行时文件，并生成`require`语句引用该共享模块
-  - 避免 **绝对路径** ：不要在模块代码中插入绝对路径，因为当项目路径变化时，文件绝对路径也会变化
-  - 使用 **peer dependencies** ：同等依赖（peer dependencies），如果你的loader简单包裹另外一个包，你应该把这个包作为一个`peerDependency`引入
+## 编写loader应遵循的准则
+  * 保持 **简单**
+  * 使用 **链式**传递
+  * **模块化** 的输出
+  * 确保 **无状态**
+  * 使用 **loader utilities**
+  * 记录 **loader的依赖**
+  * 解析 **模块依赖关系**
+  * 提取 **通用代码**
+  * 避免 **绝对路径**
+  * 使用 **peer dependencies**
+
+  #### 简单（simple）
+  loaders莺歌只做单一任务。这不仅使每个loader易维护，也可以在更多场景链式调用
+  #### 链式（chaining）
+  利用loader可以链式调用的优势。写五个简单的loader实现五项任务，而不是一个loader实现五项任务。功能隔离不仅使用loader更简单，可能还可以将它们用于你原先没有想到的功能。
+  #### 模块化（modular）
+  保证输出模块化。loader生成的模块与普通模块遵循相同的设计原则。
+  #### 无状态（stateless）
+  确保loader在不同模块之间转化不保存状态。每次运行都应独立与其他编译模块以及相同模块之前的编译结果。
+  #### loader工具库（Loader Utilities）
+  冲分利用`loader-utils`包。它提供了许多有用的工具，最常用的一种工具是获取传递给loader的选项。
+  #### loader依赖（loader dependencies）
+  如果以loader使用外部资源，**必须声明它**。这些信息用于使缓存loaders无效，以及在观察模式（watch mode）下重编译。下面是一个简单示例，说明如何使用`addDependency`方法实现上述声明：
+  ```js
+  import path from 'path';
+
+  export default function (source) {
+    var callback = this.async();
+    var headerPath = path.resolve('header.js');
+
+    this.addDependency(headerPath);
+
+    fs.readFile(headerPath, 'utf-8', function (err, header) {
+      if (err) return callback(err);
+      callback(null, header + '\n' + source);
+    });
+  }
+  ```
+  #### 模块依赖（module dependencies）
+  根绝模块类型，可能会有不同的模式指定依赖关系。例如在CSS中，使用`@import`和`url(...)`语句来声明依赖。这些依赖应该由模块系统解析。
+  可以通过以下两种方式中的一种来实现：
+    * 通过把它们转换成`require`语句
+    * 使用`this.resolve`函数解析路径
+  #### 通用代码（common code）
+  避免在loader处理的每个模块中生成通用代码。相反，应该在loader中创建一个运行时文件，并生成`require`语句以引用该共享模块：
+  src/loader-runtime.js
+  ```js
+  const { someOtherModule } = require('./some-other-module');
+
+  module.exports = function runtime(params) {
+    const x = params.y * 2;
+
+    return someOtherModule(params, x);
+  };
+  ```
+  src/loader.js
+  ```js
+  import runtime from './loader-runtime.js';
+
+  export default function loader(source) {
+    // 自定义的 loader 逻辑
+
+    return `${runtime({
+      source,
+      y: Math.random(),
+    })}`;
+  }
+  ```
+  #### 绝对路径（absolute paths）
+  不要在模块代码中插入绝对路径，因为当项目根路径变化时，文件绝对路径也会变化`loader-utils`中的`stringifyRequest`方法，可以将绝对路径转化为相对路径。
+  #### 同等依赖（peer dependencies）
+  如果你的loader简单包裹另外一个包，你应该把这个包作为一个`peerDependency`引入。这种方式允许应用程序开发者在必要情况下，在`package.json`中指定所需的确定版本。
+  例如，sass-loader指定node-sass作为同等依赖，引用如下：
+  ```js
+  {
+    "peerDependencies": {
+      "node-sass": "^4.0.0"
+    }
+  }
+  ```
