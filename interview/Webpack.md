@@ -30,7 +30,7 @@ gulp.task('default', gulp.series(...tasks, (done) => {
 ## webpack相关概念
 * entry：入口起点，用来告诉webpack用哪个文件作为构建依赖图的起点。webpack会根据entry递归的去寻找依赖，每个依赖都将被它处理，最后输出到打包成果中。
 * output：output属性告诉webpack在哪里输出它所创建的bundle，以及如何命名这些文件。
-* mode：4.0开始，webpack支持零配置，旨在未开发人员减少上手难度，同时加入了mode的概念，用于指定打包的目标环境，以便在打包的过程中启用webpack针对不同的环境下内置的优化。
+* mode：4.0开始，webpack支持零配置，旨在为开发人员减少上手难度，同时加入了mode的概念，用于指定打包的目标环境，以便在打包的过程中启用webpack针对不同的环境下内置的优化。
 * loader：默认情况下webpack只能处理JavaScript和JSON文件。loader让webpack能够去处理其他类型的文件，并将它们转换为有效模块，以供应用程序使用。
 * plugin：loader用于转换某些类型的模块，而插件则可以用于执行范围更广的任务。包括：打包优化，资源管理，注入环境变量。
 * chunk：指代码块，一个chunk可能由多个模块组合而成，也用于代码合并与分割。
@@ -40,7 +40,7 @@ gulp.task('default', gulp.series(...tasks, (done) => {
 ## loader和plugin的区别？
 * 作用：
   - `loader`直译为“加载器”。webpack将一切文件视为模块，但是webpack原生值能解析js和json文件，如果想将其他文件也打包的话，就会用到`loader`。所以`loader`的作用是让webpack拥有了加载和解析其他文件的能力。
-  - `plugin`直译为“插件”。`plugin`可以扩展webpack的功能，让webpack具有更多的灵活性。在webpack运行的生命周期中会广播出许多时间，`plugin`可以监听这些时间，在合适的时机通过webpack提供的API改变输出结果。
+  - `plugin`直译为“插件”。`plugin`可以扩展webpack的功能，让webpack具有更多的灵活性。在webpack运行的生命周期中会广播出许多事件，`plugin`可以监听这些事件，在合适的时机通过webpack提供的API改变输出结果。
 * 用法：
   - loader在`module.rules`中配置，也就是说他作为模块的解析规则而存在。类型为数组，每一项都是一个`Object`，里面描述了队医什么类型的文件（`test`），使用什么加载（`loader`）和使用的参数（`options`）
   - plugin在`plugins`中单独配置。类型为数组，每一项是一个`plugin`的实例，参数都通过构造函数传入。
@@ -98,7 +98,7 @@ module.exports = function(source) {
   * 使用 **peer dependencies**
 
   #### 简单（simple）
-  loaders莺歌只做单一任务。这不仅使每个loader易维护，也可以在更多场景链式调用
+  loaders应该只做单一任务。这不仅使每个loader易维护，也可以在更多场景链式调用
   #### 链式（chaining）
   利用loader可以链式调用的优势。写五个简单的loader实现五项任务，而不是一个loader实现五项任务。功能隔离不仅使用loader更简单，可能还可以将它们用于你原先没有想到的功能。
   #### 模块化（modular）
@@ -168,7 +168,7 @@ module.exports = function(source) {
   ```
 
 ## webpackde 构建流程
-webpack的运行流程是一个串行的过程，从启动到结束会一次执行以下流程：
+webpack的运行流程是一个串行的过程，从启动到结束会依次执行以下流程：
 1. 初始化参数：从配置文件和Shell语句中读取与合并参数，得出最终参数；
 2. 开始编译：用上一步得到的参数初始化`Compiler`对象，加载所有配置的插件，执行对象的`run`方法开始执行编译；
 3. 确定入口：根据配置中的entry找出所有的入口文件；
