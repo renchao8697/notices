@@ -167,7 +167,7 @@ module.exports = function(source) {
   }
   ```
 
-## webpackde 构建流程
+## webpack的构建流程
 webpack的运行流程是一个串行的过程，从启动到结束会依次执行以下流程：
 1. 初始化参数：从配置文件和Shell语句中读取与合并参数，得出最终参数；
 2. 开始编译：用上一步得到的参数初始化`Compiler`对象，加载所有配置的插件，执行对象的`run`方法开始执行编译；
@@ -177,3 +177,25 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
 6. 输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的Chunk转换成一个单独的文件加入到输出列表，这步是可以修改输出内容的最后机会；
 7. 输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统。
 在以上过程中，webpack会在特定的时间点广播特定的事件，插件在监听到感兴趣的事件后会执行特定的逻辑，并且插件可以调用webpack提供的API改变webpack的运行结果。
+
+## webpack4与5的区别
+* 引入图片、字体图标、音视频
+  - 4.x需要`url-loader`和`file-loader`
+  - 5.x可以使用内置的`Asset Modules`
+* 清理`/dist`文件夹
+  - 4.x使用`clean-webpack-plugin`插件
+  - 5.x可在`output`中添加`clean: true`属性
+
+## 预获取（prefetch）、预加载（preload）
+* prefetch（预获取）：将来某些导航下可能需要的资源
+  - `import(/* webpackPrefetch: true */ './xxx/xxx.js')`
+  - 上面代码会生成`<link rel="prefetch" href="xxx.js">`并追加到页面头部
+  - prefetch chunk会在父chunk加载结束后开始加载
+  - prefetch chunk在浏览器闲置时下载
+  - prefetch chunk会用于未来的某个时刻
+* preload（预加载）：当前导航下可能需要资源
+  - `import(/* webpackPreload: true */ 'Libary')`
+  - `<link rel="preload">`
+  - preload chunk会在父chunk加载时，以并行方式开始加载
+  - preload chunk具有中等优先级，并立即下载
+  - preload chunk会在父chunk中立即请求，用于当下时刻
