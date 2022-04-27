@@ -199,3 +199,158 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
   - preload chunk会在父chunk加载时，以并行方式开始加载
   - preload chunk具有中等优先级，并立即下载
   - preload chunk会在父chunk中立即请求，用于当下时刻
+
+## 常见的loader
+  * file-loader：把文件输出到一个文件夹中，在代码中通过相对URL去引用输出的文件
+  ```js
+    {
+      test: /\.(png|jpg|gif)$/,
+      use: [
+        {
+          loader: 'file-loader',
+          options: {
+            outputPath: 'font', // 文件输出路径，默认，undefined
+            publicPath: 'font', // 文件引用路径，默认，__webpack_public_path__
+            name: '[name].[ext]'
+          }
+        }
+      ]
+    }
+  ```
+  * url-loader：和file-loader类似，但是能在文件很小的情况下以base64的方式吧文件内容注入到代码中
+  ```js
+    {
+      test: /\.(png|jpg|gif)$/,
+      use: [
+        {
+          loader: 'url-loader',
+          options: {
+            fallback: 'file-loader', // 超过限制大小使用的loader，默认，file-loader
+            fallback: {
+              loader: 'file-loader',
+              options: {
+                name: 'img/[name].[hash:8].[ext]'
+              }
+            },
+            limit: 8192
+          }
+        }
+      ]
+    }
+  ```
+
+
+
+## asset module资源模块
+asset module资源模块，在webpack5之前，通常使用：
+  * raw-loader 将文件导入为字符串
+  * url-loader 将文件作为data URI内联到bundle中
+  * file-loader 将问价发送到输出目录
+  
+资源模块通过4中新的模块类型，来替换之前都loader：
+  * asset/resource 发送一个单独的文件并导出URL（之前使用file-loader）
+  * asset/inline 导出一个资源的data URI（之前使用url-loader）
+  * asset/source 导出资源的源代码（之前使用raw-loader）
+  * asset 在导出一个data URI和发送一个单独的文件之间自动选择（之前使用url-loader，并配置资源体积限制）
+
+```js
+const path = require('path');
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    filename: 'main.js',
+    path: path.resolve(__dirname, 'dist'),
+    // 配置asset文件路径及名称，优先级低于generator.filename
+    assetModuleFilename: 'asset/[hash][ext][query]'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.jpg/,
+        type: 'asset/resource',
+        generator: {
+          // 配置文件路径及名称，优先级高于output.assetModuleFilename
+          filename: 'images/[hash][ext][query]'
+        }
+      },
+      {
+        test: /\.svg$/,
+        type: 'asset/inline'
+        // 可通过generator.dataUrl自定义编码算法
+        generator: {
+          dataUrl: content => {
+            content = content.toString();
+            return svgToMiniDataURI(content);
+          }
+        }
+      },
+      {
+        test: /\.txt$/,
+        type: 'asset/source'
+      },
+      {
+        test: /\.png$/,
+        type: 'asset',
+        parer: {
+          dataUrlCondition: {
+            maxSize: 4 * 1024
+          }
+        }
+      }
+    ]
+  },
+};
+```
+
+变更内联loader的语法
+在asset模块和webpack5之前，可以使用内联语法与上述loader结合使用。
+现在建议取点所有的内联loader的语法，使用资源查询条件来模仿内联语法的功能。
+```js
+- import myModule from 'raw-loader!my-module';
++ import myModule from 'my-module?raw';
+```
+webpack相关配置：
+```js
+module: {
+  rules: [
+    {
+      resourceQuery: /raw/,
+      type: 'asset/source'
+    }
+  ]
+}
+```
+如果你想把原始资源排除在其他loader的处理范围以外，请使用取反的原则：
+```js
+rules: [
+  {
+    test: /\.m?js$/,
+    resourceQuery: { not: [/raw/] },
+    use: [ ... ]
+  },
+  {
+    resourecQuery: /raw/,
+    type: 'asset/source',
+  }
+]
+```
+或者使用oneOf的规则列表。此处只应用第一个匹配规则：
+```js
+module: {
+  rules: [
+    {
+      oneOf: [
+        {
+          resoureceQuery: /raw/,
+          type: 'asset/sourec',
+        },
+        {
+          test: /\.m?js$/,
+          use: [ ... ]
+        }
+      ]
+    }
+  ]
+}
+```
