@@ -201,43 +201,99 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
   - preload chunk会在父chunk中立即请求，用于当下时刻
 
 ## 常见的loader
-  * file-loader：把文件输出到一个文件夹中，在代码中通过相对URL去引用输出的文件
-  ```js
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: [
-        {
-          loader: 'file-loader',
-          options: {
-            outputPath: 'font', // 文件输出路径，默认，undefined
-            publicPath: 'font', // 文件引用路径，默认，__webpack_public_path__
-            name: '[name].[ext]'
-          }
+* file-loader：把文件输出到一个文件夹中，在代码中通过相对URL去引用输出的文件
+```js
+  {
+    test: /\.(png|jpg|gif)$/,
+    use: [
+      {
+        loader: 'file-loader',
+        options: {
+          outputPath: 'font', // 文件输出路径，默认，undefined
+          publicPath: 'font', // 文件引用路径，默认，__webpack_public_path__
+          name: '[name].[ext]'
         }
-      ]
-    }
-  ```
-  * url-loader：和file-loader类似，但是能在文件很小的情况下以base64的方式吧文件内容注入到代码中
-  ```js
-    {
-      test: /\.(png|jpg|gif)$/,
-      use: [
-        {
-          loader: 'url-loader',
-          options: {
-            fallback: 'file-loader', // 超过限制大小使用的loader，默认，file-loader
-            fallback: {
-              loader: 'file-loader',
-              options: {
-                name: 'img/[name].[hash:8].[ext]'
-              }
-            },
-            limit: 8192
-          }
+      }
+    ]
+  }
+```
+* url-loader：和file-loader类似，但是能在文件很小的情况下以base64的方式吧文件内容注入到代码中
+```js
+  {
+    test: /\.(png|jpg|gif)$/,
+    use: [
+      {
+        loader: 'url-loader',
+        options: {
+          fallback: 'file-loader', // 超过限制大小使用的loader，默认，file-loader
+          fallback: {
+            loader: 'file-loader',
+            options: {
+              name: 'img/[name].[hash:8].[ext]'
+            }
+          },
+          limit: 8192
         }
-      ]
-    }
+      }
+    ]
+  }
+```
+* vue-loader、vue-template-compiler
+  - 使用vue-loader除了使用loader之外，还要引入`VueLoaderPlugin`插件，它的作用是将你定义过的其它规则复制并应用到`.vue`文件里相应语言的部分。
+  - 当vue-loader编译组件中的template时，如遇到url，它会将该url转换为webpack模块请求，如：
+  ```html
+    <img src="../image.png">
   ```
+  将会编译为：
+  ```js
+  createElement('img', {
+    attrs: {
+      src: require('../image.png')
+    }
+  })
+  ```
+  - 转换规则：
+    1. 如遇绝对路径，原样保留
+    2. 如`.`开头，按本地文件目录解析
+    3. 如`～`开头，将会被看作模块依赖（可引用node依赖中的资源）
+    4. 如`@`开头，也会被看作模块依赖，如使用`vue-cli`，默认配置了`alias`，可直接指向`/src`
+  - sass-loader可以使用additionalData选项，可在所有被处理的文件中共享变量，而不需要显式的导入
+  ```js
+  {
+    loader: 'sass-loader',
+    options: {
+      additionalData: `$color: red;`
+      additionalData: '@import \'@/scss/variables.scss\';\n@import \'~vuetify/src/styles/styles.sass\';'
+    }
+  }
+  ```
+
+
+```js
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+module.export = {
+  mode: 'development',
+  module: {
+    rules: [
+      {
+        test: /./vue$/,
+        loader: 'vue-loader'
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader'
+      },
+      {
+        test: /./css$/,
+        use: ['vue-style-loader', 'css-loader']
+      }
+    ]
+  },
+  plugins: [
+    new VueLoaderPlugin()
+  ]
+}
+```
 
 
 
