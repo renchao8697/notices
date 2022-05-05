@@ -264,6 +264,10 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
     options: {
       additionalData: `$color: red;`
       additionalData: '@import \'@/scss/variables.scss\';\n@import \'~vuetify/src/styles/styles.sass\';'
+      sassOptions: {
+        // sass-loader默认不处理.sass的缩进语法，需要添加indentedSyntax选项
+        indentedSyntax: true
+      }
     }
   }
   ```
