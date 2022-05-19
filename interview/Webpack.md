@@ -201,7 +201,8 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
   - preload chunk会在父chunk中立即请求，用于当下时刻
 
 ## 常见的loader
-* file-loader：把文件输出到一个文件夹中，在代码中通过相对URL去引用输出的文件
+### file-loader
+file-loader：把文件输出到一个文件夹中，在代码中通过相对URL去引用输出的文件
 ```js
   {
     test: /\.(png|jpg|gif)$/,
@@ -217,7 +218,8 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
     ]
   }
 ```
-* url-loader：和file-loader类似，但是能在文件很小的情况下以base64的方式吧文件内容注入到代码中
+### url-loader
+url-loader：和file-loader类似，但是能在文件很小的情况下以base64的方式吧文件内容注入到代码中
 ```js
   {
     test: /\.(png|jpg|gif)$/,
@@ -238,7 +240,7 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
     ]
   }
 ```
-* vue-loader、vue-template-compiler
+### vue-loader、vue-template-compiler
   - 使用vue-loader除了使用loader之外，还要引入`VueLoaderPlugin`插件，它的作用是将你定义过的其它规则复制并应用到`.vue`文件里相应语言的部分。
   - 当vue-loader编译组件中的template时，如遇到url，它会将该url转换为webpack模块请求，如：
   ```html
@@ -272,7 +274,6 @@ webpack的运行流程是一个串行的过程，从启动到结束会依次执�
   }
   ```
 
-
 ```js
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 module.export = {
@@ -299,6 +300,292 @@ module.export = {
 }
 ```
 
+## 常见的plugin
+### html-webpack-plugin
+HtmlWebpackPlugin简化HTML文件的创建，以便为你的webpack包提供服务。
+| Name   | Type     | Default     | Description     |
+| :--:   | :--:     |  :--:       | :---------      |
+| `title`  | `{String}` | `Webpack App` | 生成`HTML`的`title` |
+| `filename` | `{String|Function}` | 'index.html' | 输出的`HTML`文件名 |
+| `tempalte` | `{String}` |   | 模板，默认将使用`src/index.ejs` |
+| `tempalteContent` | `{String|Function|false}` | `false` | 代替`template`的内联模板 |
+| `tempalteParameters` | `{Boolean|Object|Function}` | `false` | `template`中使用的变量 |
+| `inject` | `{Boolean|String}` | `true` | `true||'head'||'body'||false` 资源注入到`tempalte`中的位置，`true`将根据脚本加载选项添加到`body/header`中，`false`将禁止自动注入 |
+| `publicPath` | `{String|'auto'}` | `auto` | script和link公共路径 |
+| `scriptLoading` | `{'blocking'|'defer'|'module'}` | `defer` | script引入的形式 |
+| `favicon` | `{String|}` |  | favicon的路径 |
+| `meta` | `{Object}` | `{}` | meta标签 |
+| `base` | `{Object|String|false}` | `false` | 注入一个base标签 |
+| `minify` | `{Boolean|Object}` | `true`如果mode为production为false | html压缩 |
+| `hash` | `{Boolean}` | `false` | script和css是否添加hash |
+| `cache` | `{Boolean}` | `true` | 开启后文件未修改时使用缓存 |
+| `showErrors` | `{Boolean}` | `true` | 将错误信息写入到HTML |
+| `chunks` | `{?}` | `?` | 可以添加一些chunks |
+| `chunksSortMode` | `{String|Function}` | `auto` | 在写入HTML之前对chunks分类`none|'auto'|'manual'|{Funcction}` |
+| `excludeChunks` | `{Array.<string>}` |  | 排除的chunks |
+| `xhtml` | `{Boolean}` | false | link标签自关闭 |
+
+
+
+## DevServer
+```js
+module.exports = {
+  // ...
+  devServer: {
+    // 'auto' | 'all'  [string]： auto时允许localhost、host和client.webSocketURL.hostname
+    // 允许访问的服务器白名单
+    allowedHosts: [ '.host.com', 'host2.com' ],  // “.”子域通配符
+    // boolean = false  object
+    // 用于在启动时通过ZeroConf网络广播你的开发服务器
+    bonjour: {
+      type: 'http',
+      protocol: 'udp'
+    },
+    client: {
+      // 'log' | 'info' | 'warn' | 'error' | 'none' | 'verbose'
+      // 允许在浏览器中设置日志级别
+      logging: 'info',
+      // boolean = true  object: { errors boolean = true, warnings boolean = true }
+      // 当出现编译错误或警告时，在浏览器中显示全屏覆盖
+      overlay: true,
+      // boolean 浏览器中以百分比显示编译进度
+      progress: true,
+      // boolean = true  number
+      // 告诉dev-server它应该尝试重新连接客户端的次数。true为无限次
+      reconnect: true,
+      // 'ws' | 'sockjs'  string
+      // 该配置项允许我们为客户端单独选择当前的devServer传输模式，或者提供自定义的客户端实现
+      webSocketTransport: 'ws',
+      webSocketTransport: require.resolve('./CustomClient'),
+      // string  object
+      // 选项允许指定URL到web socket服务器
+      // webSocketURL: 'ws://0.0.0.0:8080/ws',
+      webSocketURL: {
+        hostname: '0.0.0.0',
+        pathname: '/ws',
+        password: 'dev-server',
+        port: 8080,
+        protocol: 'ws',
+        username: 'webpack'
+      }
+    },
+    // boolean = true
+    // 启用gzip compression
+    compress: true,
+    // object
+    // 为webpack-dev-middleware提供处理webpack资源的配置项
+    devMiddleware: {
+      index: true,
+      mimeTypes: { phtml: 'text/html' },
+      publicPath: '/publicPathForDevServe',
+      serverSideRender: true,
+      writeToDisk: true,
+    },
+    // boolean
+    // 使用spdy提供HTTP/2服务。对于node15.0.0及更高版本，此选项将被忽略，以为spdy在这些版本中已被破坏。一旦Express支持，开发服务器将迁移到node内置的HTTP/2。（测试5.x可以，https）
+    http2: true,
+    // boolean object
+    // 使用https
+    https: {
+      ca: './path/to/server.pem',
+      pfx: './path/to/server.pfx',
+      key: './path/to/server.key',
+      cert: './path/to/server.crt',
+      passphrase: 'webpack-dev-server',
+      requestCert: true,
+    },
+    // 为所有响应添加headers
+    headers: { 'X-Custom-Foo': 'bar' }
+    headers: [
+      {
+        key: 'X-Custom',
+        value: 'foo'
+      },
+      {
+        key: 'Y-Custom',
+        value: 'bar'
+      }
+    ],
+    // boolean = false  object
+    // 在使用history时，将index.html代替404响应
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/$/, to: '/views/landing.html' },
+        { from: /^\/subpage/, to: '/views/subpage.html' },
+        { from: /./, to: '/views/404.html' },
+      ],
+      disabledDotRule: true,
+    },
+    // 'local-ip' | 'local-ipv4' | 'local-ipv6'  string
+    // 指定要使用的host
+    host: '0.0.0.0'， // 这样可以让服务器被外部访问
+    // 'only'  boolean = true
+    // 启用热模块替换
+    hot: 'only',  // 在构建失败时不刷新页面作为回退
+    // true  string
+    // The Unix socket to listen to (instead of a host).
+    ipc: true,  // 监听、you-os-temp-dir/webpack-dev-server.sock
+    ipc: path.join(__dirname, 'my-socket.sock'),
+    // boolean = true
+    // 默认情况下，当监听到文件变化时dev-server将会重新加载或刷新页面
+    // 为了liveReload能够生效，devServer.hot配置项必须禁用或者devServer.watchFiles配置项必须启用。
+    liveReload: false,  // 禁用liveReload
+    // boolean
+    // 告诉dev-server是否使用magic HTML routes（webpack输出的路由，例如/main for main.js）
+    magicHtml: true,
+    // function (devServer)
+    // 提供服务器内部所在其他中间件之后执行自定义中间件的能力
+    // 该配置项已启用，以支持devServer.setupMiddlewares
+    onAfterSetupMiddleware: function(devServer) {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined');
+      }
+      devServer.app.get('/some/path', function (req, res) {
+        res.json({ custom: 'response' })
+      })
+    },
+    // function (devServer)
+    // 提供服务器内部所在其他中间件之前执行自定义中间件的能力
+    // 该配置项已启用，以支持devServer.setupMiddlewares
+    onBeforeSetupMiddleware: function(devServer) {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined');
+      }
+      devServer.app.get('/some/path', function (req, res) {
+        res.json({ custom: 'response' })
+      })
+    },
+    // function (devServer)
+    // 提供在webpack-dev-server开始监听端口连接时执行自定义函数的能力
+    onListening: function (devServer) {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined');
+      }
+      const port = devServer.server.address().port;
+      console.log('Listening on port: ', port);
+    },
+    // boolean  string  object  [string, object]
+    // 告诉dev-server在服务器已经启动后打开浏览器
+    open: [ '/my-page', '/another-page' ],
+    open: {
+      app: {
+        name: 'google-chrome',  // 不同平台名称不同
+      }
+    },
+    // 'auto'  string  number
+    // 监听的请求端口号
+    port: 'auto', // 配置项不能设置未null或''，如果自动使用一个可用端口要使用'auto'
+    // object  [object, function]
+    // 代理，使用http-proxy-middleware
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        pathRewrite: { '^/api': '' },
+        secure: false,  // 默认不接受HTTPS上运行证书无效的服务器，需设置该项为false
+        changeOrigin: true,  // 默认情况下，代理时会保留主机头的来源，可以设置该项以覆盖此行为
+      }
+    },
+    // 默认情况proxy不会代理对root的请求。要启用根代理，应将devMiddleware.index设置为false
+    devMiddleware: {
+      index: false
+    }
+    // 配置多个代理
+    proxy: [
+      {
+        context: ['/auth', '/api'],
+        target: 'http://localhost:3000'
+      }
+    ],
+    // 'http' | 'https' | 'spdy'  string object
+    // 设置服务器和配置项，默认http
+    server: {
+      type: 'https',
+      options: {
+        minVersion: 'TLSv1.1',
+        key: fs.readFileSync(path.join(__dirname, './server.key')),
+        pfx: fs.readFileSync(path.join(__dirname, './server.pfx')),
+        cert: fs.readFileSync(path.join(__dirname, './server.crt')),
+        ca: fs.readFileSync(path.join(__dirname, './ca.pem')),
+        passphrase: 'webpack-dev-server',
+        requestCert: true,
+      },
+    },
+    // boolean = true
+    // 允许在SIGINT和SIGTERM信号时关闭开发服务器和退出进程
+    setupExitSignals: true,
+    // function (middlewares, devServer)
+    // 提供执行自定义函数和应用自定义中间件的能力
+    setupMiddlewares: (middlewares, devServer) => {
+      if (!devServer) {
+        throw new Error('webpack-dev-server is not defined');
+      }
+      devServer.app.get('/setup-middleware/some/path', (_, response) => {
+        response.send('setup-middlewares option GET');
+      })
+      // 在其他中间件之前运行一个中间件（代替onBeforeSetupMiddleware）
+      middlewares.unshift({
+        name: 'first-in-array',
+        path: '/foo/path',  // 可选
+        middleware: (req, res) => {
+          res.send('Foo!');
+        }
+      })
+      // 在其他中间件之后运行一个中间件（代替onAfterSetupMiddleware）
+      middlewares.push({
+        name: 'hello-world-test-one',
+        path: '/foo/bar',  // 可选
+        middleware: (req, res) => {
+          res.send('Foo Bar!');
+        }
+      })
+
+      middlewares.push((req, res) => {
+        res.send('Hello World!');
+      })
+
+      return middleWares;
+    }
+    // boolean  string  object  [string, object]
+    // 该配置项允许配置从目录提供静态文件的选项（默认public， false禁用）
+    static: ['assets', 'css'],
+    static: {
+      // string = path.join(process.cwd(), 'public')
+      // 告诉服务器从哪里提供内容
+      directory: path.join(__dirname, 'public'),
+      // object
+      // 可配置从static.directory提供静态文件的高级选项
+      staticOptions: {
+        redirect: true
+      },
+      // string = '/'  [string]
+      // 告诉服务器在哪个URL上提供static.directory的内容
+      publicPath: '/serve-public-path-url',
+      // boolean object = { icons: true }
+      // 告诉开发服务器启用后使用serverIndex中间件
+      serveIndex: true,
+      // boolean  object
+      // 通过static.directory配置告诉dev-server监听文件（默认启用）
+      watch: {
+        ignored: '*.txt',
+        usePolling: false,
+      }
+    },
+    // string  object  [string, object] 
+    // 该配置项允许你配置globs/directories/files来监听文件变化
+    watchFiles: ['src/**/*.php', 'public/**/**'],
+    watchFiles: {
+      paths: ['src/**/*.php', 'public/**/*'],
+      options: {
+        usePolling: false,
+      }
+    }
+    // false | 'sockjs' | 'ws'  string  function  object
+    // 该项允许我们选择当前的web-socket服务器或者提供自定义的web-socket服务器实现
+    webSocketServer: 'ws'
+    webSocketServer: require.resolve('./CustomServer'),
+  }
+}
+```
 
 
 ## asset module资源模块
