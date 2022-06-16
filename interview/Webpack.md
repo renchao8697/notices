@@ -382,7 +382,8 @@ module.exports = {
       writeToDisk: true,
     },
     // boolean
-    // 使用spdy提供HTTP/2服务。对于node15.0.0及更高版本，此选项将被忽略，以为spdy在这些版本中已被破坏。一旦Express支持，开发服务器将迁移到node内置的HTTP/2。（测试5.x可以，https）
+    // 使用spdy提供HTTP/2服务。对于node15.0.0及更高版本，此选项将被忽略，以为spdy在这些版本中已被破坏。
+    // 一旦Express支持，开发服务器将迁移到node内置的HTTP/2。（测试5.x可以，https）
     http2: true,
     // boolean object
     // 使用https
