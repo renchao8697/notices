@@ -1,3 +1,3 @@
-# notices
+# Note
 
-笔记
+学习笔记
