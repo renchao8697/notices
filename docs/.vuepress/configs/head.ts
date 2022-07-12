@@ -5,7 +5,7 @@ export const head: HeadConfig[] = [
     'link',
     {
       rel: 'icon',
-      href: '/favicon.ico',
+      href: '/note/favicon.ico',
     },
   ],
 ];
