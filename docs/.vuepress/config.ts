@@ -10,7 +10,7 @@ export default defineUserConfig({
   base: '/note/',
   head,
   theme: defaultTheme({
-    docsRepo: 'https://gitlab.com/renchao8697/note',
+    docsRepo: 'https://github.com/renchao8697/note',
     docsBranch: 'main',
     docsDir: 'docs',
     editLinkPattern: ':repo/-/edit/:branch/:path',
