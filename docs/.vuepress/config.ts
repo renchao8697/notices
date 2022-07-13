@@ -10,10 +10,8 @@ export default defineUserConfig({
   base: '/note/',
   head,
   theme: defaultTheme({
-    docsRepo: 'https://github.com/renchao8697/note',
-    docsBranch: 'main',
+    repo: 'renchao8697/note',
     docsDir: 'docs',
-    editLinkPattern: ':repo/-/edit/:branch/:path',
     navbar: navbar,
     sidebar: sidebar,
   }),
