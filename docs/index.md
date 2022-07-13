@@ -1,3 +1,3 @@
-# VuePress
+# Note
 
 学习笔记
