@@ -10,6 +10,7 @@ export default defineUserConfig({
   base: '/note/',
   head,
   theme: defaultTheme({
+    logo: '/images/logo.png',
     repo: 'renchao8697/note',
     docsDir: 'docs',
     navbar: navbar,
