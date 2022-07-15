@@ -36,7 +36,8 @@ export const navbar: NavbarConfig = [
   {
     text: 'HTTP',
     children: [
-      '/http/cache'
+      '/http/headers.md',
+      '/http/cache.md'
     ]
   }
 ]

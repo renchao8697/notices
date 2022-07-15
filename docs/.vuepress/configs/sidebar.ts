@@ -24,6 +24,7 @@ export const sidebar: SidebarConfig = {
     '/frame/webpack/',
   ],
   '/http/': [
+    '/http/headers.md',
     '/http/cache.md'
   ]
 }
