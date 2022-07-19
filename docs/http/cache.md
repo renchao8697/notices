@@ -1,7 +1,3 @@
----
-tags: [Expires, Cache-Control, Pragma, ETag, If-None-Match ,Last-Modified, If-Modified-Since]
----
-
 # HTTP 缓存
 网页中的资源都需要从服务器下载，如果资源较大或者路程较远，那下载过程会比较耗时，网页会长时间处于loading状态。所以，HTTP设计了缓存功能，把已下载的资源保存到本地，如再次打开该网页，会直接读取缓存，减少等待时间，提升用户体验，并可以减轻服务器压力。
 
