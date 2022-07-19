@@ -16,7 +16,7 @@
       }
     ```
     因为`props`是响应式的，不能使用ES6解构，它会消除prop的响应性。
-    如需要解构`props`，可在`setup`中使用`toRef`函数来完成：
+    如需要解构`props`，可在`setup`中使用`toRefs`函数来完成：
     ```js
       import { toRefs } from 'vue'
       setup(props) {
