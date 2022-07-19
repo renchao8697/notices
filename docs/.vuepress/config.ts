@@ -1,5 +1,6 @@
 import { defaultTheme, defineUserConfig } from 'vuepress';
-import { searchPlugin } from '@vuepress/plugin-search';
+// import { searchPlugin } from '@vuepress/plugin-search';
+import { docsearchPlugin } from '@vuepress/plugin-docsearch'
 
 import { head, navbar, sidebar } from './configs';
 
@@ -17,13 +18,18 @@ export default defineUserConfig({
     sidebar: sidebar,
   }),
   plugins: [
-    searchPlugin({
-      locales: {
-        '/': {
-          placeholder: 'search',
-        },
-      },
-      getExtraFields: (page) => (page.frontmatter.tags as []) ?? [],
-    }),
+    // searchPlugin({
+    //   locales: {
+    //     '/': {
+    //       placeholder: 'search',
+    //     },
+    //   },
+    //   getExtraFields: (page) => (page.frontmatter.tags as []) ?? [],
+    // }),
+    docsearchPlugin({
+      appId: '1OGXP86PP2',
+      apiKey: '0c7062939aa842c7a7fb8efcf9b499f5',
+      indexName: 'renchao8697'
+    })
   ],
 });
